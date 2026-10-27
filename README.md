@@ -1,57 +1,70 @@
 # Driver Drowsiness Detection
 
-A Python computer-vision project that uses facial landmarks and eye-related signals to estimate signs of driver drowsiness through a webcam. This is an educational prototype, not a certified vehicle-safety system.
+A Python desktop application that uses a webcam, facial landmarks, and eye/mouth measurements to alert when the person in front of the camera shows signs associated with drowsiness or yawning.
 
-## Technologies
+**Safety note:** This is an educational prototype, not a certified driver-monitoring system. Do not rely on it to decide whether it is safe to drive, and never test it while driving.
 
-- Python
-- OpenCV
-- dlib
-- NumPy and SciPy
-- Tkinter for the desktop interface
+## Features
 
-## How it works
+- Live webcam feed in a Tkinter interface
+- Facial landmark detection using dlib's 68-point predictor
+- Eye Aspect Ratio (EAR) to detect prolonged eye closure
+- Mouth Aspect Ratio (MAR) to detect sustained yawning
+- On-screen and spoken alerts
+- Timestamped alert log
+- Light/dark interface theme
 
-1. Capture frames from a webcam.
-2. Detect facial landmarks.
-3. Calculate eye-related measurements from the detected landmarks.
-4. Track the measurements over time and trigger an alert when the configured drowsiness condition is met.
+## Tech stack
 
-The result depends on camera position, lighting, landmark detection quality, and the thresholds used by the implementation.
+Python, OpenCV, dlib, NumPy, Pillow, imutils, SciPy, Tkinter, and pyttsx3.
 
 ## Requirements
 
-- Python installed on your system
-- A working webcam
-- The Python packages listed in the project's imports / dependency file
-- The dlib facial-landmark model file expected by the code
+- Python 3.10 or 3.11 is a reasonable starting point; dlib installation depends on your operating system and Python version.
+- A webcam
+- Tkinter support in your Python installation
+- The `shape_predictor_68_face_landmarks.dat` file included in this repository
 
 ## Run locally
 
-1. Clone this repository.
-2. Create and activate a virtual environment.
-3. Install the project dependencies. If a `requirements.txt` file is present, run:
+Clone the repository and open a terminal in its directory.
 
-   ```bash
-   python -m pip install -r requirements.txt
-   ```
+Create and activate a virtual environment:
 
-4. Download or place the facial-landmark model file required by the code in the configured location. Follow the model provider's license and terms.
-5. Run the main Python script identified in the repository.
-6. Allow webcam access and test in a well-lit environment.
+```bash
+python -m venv .venv
+```
 
-If the project does not yet include a dependency file or model file, add the exact files and setup steps before describing the application as reproducible.
+Windows PowerShell:
 
-## Limitations and safety
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python drowsiness_detect.py
+```
 
-- This prototype may miss drowsiness or produce false alarms.
-- Glasses, shadows, camera placement, and individual differences can affect landmark detection.
-- Do not use it as a replacement for adequate rest, safe driving practices, or a certified driver-monitoring system.
-- Do not test it while driving on public roads.
+If installing `dlib` fails on Windows, use a compatible Python environment and follow the dlib installation instructions for your platform. Do not install unofficial binary packages from untrusted sources.
 
-## Improvements to demonstrate
+Click **Start Detection** and allow webcam access. Press **Esc** in the video window to stop capture. Alert events are appended to `alert_log.txt`.
 
-- Add sample screenshots or a short demo video.
-- Document the eye-aspect-ratio or other threshold formula actually used in the source code.
-- Add tests for landmark calculations and alert-state logic.
-- Measure false-positive and false-negative rates on a clearly described test set.
+## How detection works
+
+- The application detects faces and obtains 68 facial landmarks.
+- EAR is calculated from vertical and horizontal eye distances. A low EAR over a consecutive-frame threshold triggers a drowsiness alert.
+- MAR measures mouth opening. A high MAR over a consecutive-frame threshold triggers a yawning alert.
+- A cooldown reduces repeated alerts.
+
+The current thresholds are hand-set values in the source code (`EAR_THRESHOLD`, `MAR_THRESHOLD`, `CONSEC_FRAMES`, and `YAWN_FRAMES`). They have not been established as clinically or scientifically validated thresholds.
+
+## Limitations
+
+Lighting, camera placement, glasses, face angle, and landmark-detection errors can affect results. False positives and missed detections are possible. The application should not be used as a substitute for sleep, rest breaks, or safe-driving decisions.
+
+## Useful next improvements
+
+- Add screenshots and a short demo recorded while stationary.
+- Extract EAR/MAR calculations into a module with unit tests.
+- Measure false positives and false negatives on a clearly documented test set.
+- Move webcam capture and GUI updates into a thread-safe design; Tkinter widgets should be updated on the main thread.
+- Document supported Python/OS combinations and model-file licensing.
